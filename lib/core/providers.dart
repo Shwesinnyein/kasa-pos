@@ -123,7 +123,24 @@ final pendingCountProvider = FutureProvider<int>((ref) {
 });
 
 final cloudSyncProvider = Provider<CloudSync>((ref) {
-  return CloudSync(ref.watch(databaseProvider), onDone: () => ref.invalidate(pendingCountProvider));
+  return CloudSync(
+    ref.watch(databaseProvider),
+    onDone: () {
+      ref.invalidate(pendingCountProvider);
+      ref.invalidate(accountListProvider);
+      ref.invalidate(productListProvider);
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(saleListProvider);
+      ref.invalidate(saleCatalogProvider);
+      ref.invalidate(purchaseListProvider);
+      ref.invalidate(repurchaseListProvider);
+      ref.invalidate(damageListProvider);
+      ref.invalidate(expenseListProvider);
+      ref.invalidate(expenseCategoryProvider);
+      ref.invalidate(profitReportProvider);
+      ref.invalidate(shopProfileProvider);
+    },
+  );
 });
 
 final onlineProvider = StreamProvider<bool>((ref) async* {

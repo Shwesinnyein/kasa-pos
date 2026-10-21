@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,7 +41,8 @@ class KasaApp extends ConsumerWidget {
       }
     });
 
-    return MaterialApp(
+    return _LiveSync(
+      child: MaterialApp(
       navigatorKey: _rootNavigatorKey,
       title: 'Kasa Shop',
       debugShowCheckedModeBanner: false,
@@ -67,6 +70,45 @@ class KasaApp extends ConsumerWidget {
         '/settings': (_) => const SettingsScreen(),
         '/cloud': (_) => const CloudSyncScreen(),
       },
+      ),
     );
+  }
+}
+
+class _LiveSync extends ConsumerStatefulWidget {
+  const _LiveSync({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_LiveSync> createState() => _LiveSyncState();
+}
+
+class _LiveSyncState extends ConsumerState<_LiveSync> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _exchange());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _exchange() {
+    if (ref.read(onlineProvider).value != true) return;
+    unawaited(ref.read(cloudSyncProvider).push());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(onlineProvider, (previous, next) {
+      if (next.value == true) _exchange();
+    });
+    return widget.child;
   }
 }
