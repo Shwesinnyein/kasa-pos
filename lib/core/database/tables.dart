@@ -35,6 +35,15 @@ class Staff extends Table {
   TextColumn get role => text()();
   TextColumn get pinHash => text()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class StaffDeletions extends Table {
+  TextColumn get id => text()();
+  DateTimeColumn get deletedAt => dateTime()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

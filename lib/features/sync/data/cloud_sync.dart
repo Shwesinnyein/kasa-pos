@@ -69,6 +69,7 @@ class CloudSync {
     if (config.key.trim().startsWith('sb_secret_')) return 'secret';
 
     try {
+      await _deleteRemovedStaff(base, config.key);
       await _pull(base, config.key);
     } on CloudSyncException catch (error) {
       return error.message;
@@ -394,15 +395,19 @@ class CloudSync {
             ),
           );
     }
+    final removedStaff = {for (final row in await _db.select(_db.staffDeletions).get()) row.id};
     for (final row in await _fetch(base, key, 'staff')) {
+      final id = row['id'] as String;
+      if (removedStaff.contains(id)) continue;
       await _db.into(_db.staff).insertOnConflictUpdate(
             StaffCompanion.insert(
-              id: row['id'] as String,
+              id: id,
               shopId: row['shop_id'] as String,
               name: row['name'] as String,
               role: row['role'] as String,
               pinHash: row['pin_hash'] as String,
               isActive: Value(row['is_active'] as bool? ?? true),
+              syncStatus: const Value('synced'),
             ),
           );
     }
@@ -736,6 +741,29 @@ class CloudSync {
     await (_db.update(_db.damages)..where((row) => row.syncStatus.equals('pending'))).write(const DamagesCompanion(syncStatus: synced));
     await (_db.update(_db.expenseCategories)..where((row) => row.syncStatus.equals('pending'))).write(const ExpenseCategoriesCompanion(syncStatus: synced));
     await (_db.update(_db.expenses)..where((row) => row.syncStatus.equals('pending'))).write(const ExpensesCompanion(syncStatus: synced));
+    await (_db.update(_db.staff)..where((row) => row.syncStatus.equals('pending'))).write(const StaffCompanion(syncStatus: synced));
+  }
+
+  Future<void> _deleteRemovedStaff(String base, String key) async {
+    final removed = await _db.select(_db.staffDeletions).get();
+    for (final row in removed) {
+      await _delete(base, key, 'staff', row.id);
+    }
+  }
+
+  Future<void> _delete(String base, String key, String table, String id) async {
+    final response = await http.delete(
+      Uri.parse('$base/rest/v1/$table?id=eq.${Uri.encodeQueryComponent(id)}'),
+      headers: {
+        'apikey': key.trim(),
+        'Authorization': 'Bearer ${key.trim()}',
+        'Prefer': 'return=minimal',
+      },
+    ).timeout(const Duration(seconds: 30));
+    if (response.statusCode >= 300) {
+      final body = response.body.length > 280 ? response.body.substring(0, 280) : response.body;
+      throw CloudSyncException('$table ${response.statusCode}: $body');
+    }
   }
 
   Future<void> _upsert(String base, String key, String table, List<Map<String, Object?>> rows) async {

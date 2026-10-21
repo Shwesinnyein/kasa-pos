@@ -1095,6 +1095,18 @@ class $StaffTable extends Staff with TableInfo<$StaffTable, StaffData> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1103,6 +1115,7 @@ class $StaffTable extends Staff with TableInfo<$StaffTable, StaffData> {
     role,
     pinHash,
     isActive,
+    syncStatus,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1159,6 +1172,12 @@ class $StaffTable extends Staff with TableInfo<$StaffTable, StaffData> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
     return context;
   }
 
@@ -1192,6 +1211,10 @@ class $StaffTable extends Staff with TableInfo<$StaffTable, StaffData> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
     );
   }
 
@@ -1208,6 +1231,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
   final String role;
   final String pinHash;
   final bool isActive;
+  final String syncStatus;
   const StaffData({
     required this.id,
     required this.shopId,
@@ -1215,6 +1239,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
     required this.role,
     required this.pinHash,
     required this.isActive,
+    required this.syncStatus,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1225,6 +1250,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
     map['role'] = Variable<String>(role);
     map['pin_hash'] = Variable<String>(pinHash);
     map['is_active'] = Variable<bool>(isActive);
+    map['sync_status'] = Variable<String>(syncStatus);
     return map;
   }
 
@@ -1236,6 +1262,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
       role: Value(role),
       pinHash: Value(pinHash),
       isActive: Value(isActive),
+      syncStatus: Value(syncStatus),
     );
   }
 
@@ -1251,6 +1278,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
       role: serializer.fromJson<String>(json['role']),
       pinHash: serializer.fromJson<String>(json['pinHash']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
     );
   }
   @override
@@ -1263,6 +1291,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
       'role': serializer.toJson<String>(role),
       'pinHash': serializer.toJson<String>(pinHash),
       'isActive': serializer.toJson<bool>(isActive),
+      'syncStatus': serializer.toJson<String>(syncStatus),
     };
   }
 
@@ -1273,6 +1302,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
     String? role,
     String? pinHash,
     bool? isActive,
+    String? syncStatus,
   }) => StaffData(
     id: id ?? this.id,
     shopId: shopId ?? this.shopId,
@@ -1280,6 +1310,7 @@ class StaffData extends DataClass implements Insertable<StaffData> {
     role: role ?? this.role,
     pinHash: pinHash ?? this.pinHash,
     isActive: isActive ?? this.isActive,
+    syncStatus: syncStatus ?? this.syncStatus,
   );
   StaffData copyWithCompanion(StaffCompanion data) {
     return StaffData(
@@ -1289,6 +1320,9 @@ class StaffData extends DataClass implements Insertable<StaffData> {
       role: data.role.present ? data.role.value : this.role,
       pinHash: data.pinHash.present ? data.pinHash.value : this.pinHash,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
     );
   }
 
@@ -1300,13 +1334,15 @@ class StaffData extends DataClass implements Insertable<StaffData> {
           ..write('name: $name, ')
           ..write('role: $role, ')
           ..write('pinHash: $pinHash, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('syncStatus: $syncStatus')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, shopId, name, role, pinHash, isActive);
+  int get hashCode =>
+      Object.hash(id, shopId, name, role, pinHash, isActive, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1316,7 +1352,8 @@ class StaffData extends DataClass implements Insertable<StaffData> {
           other.name == this.name &&
           other.role == this.role &&
           other.pinHash == this.pinHash &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.syncStatus == this.syncStatus);
 }
 
 class StaffCompanion extends UpdateCompanion<StaffData> {
@@ -1326,6 +1363,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
   final Value<String> role;
   final Value<String> pinHash;
   final Value<bool> isActive;
+  final Value<String> syncStatus;
   final Value<int> rowid;
   const StaffCompanion({
     this.id = const Value.absent(),
@@ -1334,6 +1372,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
     this.role = const Value.absent(),
     this.pinHash = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StaffCompanion.insert({
@@ -1343,6 +1382,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
     required String role,
     required String pinHash,
     this.isActive = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        shopId = Value(shopId),
@@ -1356,6 +1396,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
     Expression<String>? role,
     Expression<String>? pinHash,
     Expression<bool>? isActive,
+    Expression<String>? syncStatus,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1365,6 +1406,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
       if (role != null) 'role': role,
       if (pinHash != null) 'pin_hash': pinHash,
       if (isActive != null) 'is_active': isActive,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1376,6 +1418,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
     Value<String>? role,
     Value<String>? pinHash,
     Value<bool>? isActive,
+    Value<String>? syncStatus,
     Value<int>? rowid,
   }) {
     return StaffCompanion(
@@ -1385,6 +1428,7 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
       role: role ?? this.role,
       pinHash: pinHash ?? this.pinHash,
       isActive: isActive ?? this.isActive,
+      syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1410,6 +1454,9 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1425,6 +1472,214 @@ class StaffCompanion extends UpdateCompanion<StaffData> {
           ..write('role: $role, ')
           ..write('pinHash: $pinHash, ')
           ..write('isActive: $isActive, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StaffDeletionsTable extends StaffDeletions
+    with TableInfo<$StaffDeletionsTable, StaffDeletion> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StaffDeletionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, deletedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'staff_deletions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StaffDeletion> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deletedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StaffDeletion map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StaffDeletion(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StaffDeletionsTable createAlias(String alias) {
+    return $StaffDeletionsTable(attachedDatabase, alias);
+  }
+}
+
+class StaffDeletion extends DataClass implements Insertable<StaffDeletion> {
+  final String id;
+  final DateTime deletedAt;
+  const StaffDeletion({required this.id, required this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['deleted_at'] = Variable<DateTime>(deletedAt);
+    return map;
+  }
+
+  StaffDeletionsCompanion toCompanion(bool nullToAbsent) {
+    return StaffDeletionsCompanion(id: Value(id), deletedAt: Value(deletedAt));
+  }
+
+  factory StaffDeletion.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StaffDeletion(
+      id: serializer.fromJson<String>(json['id']),
+      deletedAt: serializer.fromJson<DateTime>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'deletedAt': serializer.toJson<DateTime>(deletedAt),
+    };
+  }
+
+  StaffDeletion copyWith({String? id, DateTime? deletedAt}) =>
+      StaffDeletion(id: id ?? this.id, deletedAt: deletedAt ?? this.deletedAt);
+  StaffDeletion copyWithCompanion(StaffDeletionsCompanion data) {
+    return StaffDeletion(
+      id: data.id.present ? data.id.value : this.id,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StaffDeletion(')
+          ..write('id: $id, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StaffDeletion &&
+          other.id == this.id &&
+          other.deletedAt == this.deletedAt);
+}
+
+class StaffDeletionsCompanion extends UpdateCompanion<StaffDeletion> {
+  final Value<String> id;
+  final Value<DateTime> deletedAt;
+  final Value<int> rowid;
+  const StaffDeletionsCompanion({
+    this.id = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StaffDeletionsCompanion.insert({
+    required String id,
+    required DateTime deletedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       deletedAt = Value(deletedAt);
+  static Insertable<StaffDeletion> custom({
+    Expression<String>? id,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StaffDeletionsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return StaffDeletionsCompanion(
+      id: id ?? this.id,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StaffDeletionsCompanion(')
+          ..write('id: $id, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10633,6 +10888,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ShopsTable shops = $ShopsTable(this);
   late final $DevicesTable devices = $DevicesTable(this);
   late final $StaffTable staff = $StaffTable(this);
+  late final $StaffDeletionsTable staffDeletions = $StaffDeletionsTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $UnitsTable units = $UnitsTable(this);
   late final $ProductsTable products = $ProductsTable(this);
@@ -10662,6 +10918,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     shops,
     devices,
     staff,
+    staffDeletions,
     categories,
     units,
     products,
@@ -11200,6 +11457,7 @@ typedef $$StaffTableCreateCompanionBuilder =
       required String role,
       required String pinHash,
       Value<bool> isActive,
+      Value<String> syncStatus,
       Value<int> rowid,
     });
 typedef $$StaffTableUpdateCompanionBuilder =
@@ -11210,6 +11468,7 @@ typedef $$StaffTableUpdateCompanionBuilder =
       Value<String> role,
       Value<String> pinHash,
       Value<bool> isActive,
+      Value<String> syncStatus,
       Value<int> rowid,
     });
 
@@ -11248,6 +11507,11 @@ class $$StaffTableFilterComposer extends Composer<_$AppDatabase, $StaffTable> {
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -11290,6 +11554,11 @@ class $$StaffTableOrderingComposer
     column: $table.isActive,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StaffTableAnnotationComposer
@@ -11318,6 +11587,11 @@ class $$StaffTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
 }
 
 class $$StaffTableTableManager
@@ -11354,6 +11628,7 @@ class $$StaffTableTableManager
                 Value<String> role = const Value.absent(),
                 Value<String> pinHash = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StaffCompanion(
                 id: id,
@@ -11362,6 +11637,7 @@ class $$StaffTableTableManager
                 role: role,
                 pinHash: pinHash,
                 isActive: isActive,
+                syncStatus: syncStatus,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11372,6 +11648,7 @@ class $$StaffTableTableManager
                 required String role,
                 required String pinHash,
                 Value<bool> isActive = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StaffCompanion.insert(
                 id: id,
@@ -11380,6 +11657,7 @@ class $$StaffTableTableManager
                 role: role,
                 pinHash: pinHash,
                 isActive: isActive,
+                syncStatus: syncStatus,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -11402,6 +11680,151 @@ typedef $$StaffTableProcessedTableManager =
       $$StaffTableUpdateCompanionBuilder,
       (StaffData, BaseReferences<_$AppDatabase, $StaffTable, StaffData>),
       StaffData,
+      PrefetchHooks Function()
+    >;
+typedef $$StaffDeletionsTableCreateCompanionBuilder =
+    StaffDeletionsCompanion Function({
+      required String id,
+      required DateTime deletedAt,
+      Value<int> rowid,
+    });
+typedef $$StaffDeletionsTableUpdateCompanionBuilder =
+    StaffDeletionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$StaffDeletionsTableFilterComposer
+    extends Composer<_$AppDatabase, $StaffDeletionsTable> {
+  $$StaffDeletionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StaffDeletionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StaffDeletionsTable> {
+  $$StaffDeletionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StaffDeletionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StaffDeletionsTable> {
+  $$StaffDeletionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$StaffDeletionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StaffDeletionsTable,
+          StaffDeletion,
+          $$StaffDeletionsTableFilterComposer,
+          $$StaffDeletionsTableOrderingComposer,
+          $$StaffDeletionsTableAnnotationComposer,
+          $$StaffDeletionsTableCreateCompanionBuilder,
+          $$StaffDeletionsTableUpdateCompanionBuilder,
+          (
+            StaffDeletion,
+            BaseReferences<_$AppDatabase, $StaffDeletionsTable, StaffDeletion>,
+          ),
+          StaffDeletion,
+          PrefetchHooks Function()
+        > {
+  $$StaffDeletionsTableTableManager(
+    _$AppDatabase db,
+    $StaffDeletionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StaffDeletionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StaffDeletionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StaffDeletionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StaffDeletionsCompanion(
+                id: id,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime deletedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => StaffDeletionsCompanion.insert(
+                id: id,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StaffDeletionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StaffDeletionsTable,
+      StaffDeletion,
+      $$StaffDeletionsTableFilterComposer,
+      $$StaffDeletionsTableOrderingComposer,
+      $$StaffDeletionsTableAnnotationComposer,
+      $$StaffDeletionsTableCreateCompanionBuilder,
+      $$StaffDeletionsTableUpdateCompanionBuilder,
+      (
+        StaffDeletion,
+        BaseReferences<_$AppDatabase, $StaffDeletionsTable, StaffDeletion>,
+      ),
+      StaffDeletion,
       PrefetchHooks Function()
     >;
 typedef $$CategoriesTableCreateCompanionBuilder =
@@ -15963,6 +16386,8 @@ class $AppDatabaseManager {
       $$DevicesTableTableManager(_db, _db.devices);
   $$StaffTableTableManager get staff =>
       $$StaffTableTableManager(_db, _db.staff);
+  $$StaffDeletionsTableTableManager get staffDeletions =>
+      $$StaffDeletionsTableTableManager(_db, _db.staffDeletions);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
   $$UnitsTableTableManager get units =>

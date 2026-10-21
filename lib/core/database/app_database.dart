@@ -10,6 +10,7 @@ part 'app_database.g.dart';
     Shops,
     Devices,
     Staff,
+    StaffDeletions,
     Categories,
     Units,
     Products,
@@ -42,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
         );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -88,6 +89,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 10) {
             await migrator.addColumn(devices, devices.supabaseUrl);
             await migrator.addColumn(devices, devices.supabaseKey);
+          }
+          if (from < 11) {
+            await migrator.addColumn(staff, staff.syncStatus);
+            await migrator.createTable(staffDeletions);
           }
         },
       );

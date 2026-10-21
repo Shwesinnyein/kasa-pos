@@ -53,6 +53,7 @@ class AccountLocalDataSource {
               role: nowRole,
               pinHash: hashPin(pin),
               isActive: Value(active),
+              syncStatus: const Value('pending'),
             ),
           );
       return null;
@@ -63,6 +64,7 @@ class AccountLocalDataSource {
         role: Value(nowRole),
         isActive: Value(active),
         pinHash: pin.isEmpty ? const Value.absent() : Value(hashPin(pin)),
+        syncStatus: const Value('pending'),
       ),
     );
     return null;
@@ -72,6 +74,9 @@ class AccountLocalDataSource {
     final existing = await (_db.select(_db.staff)..where((row) => row.id.equals(id))).getSingleOrNull();
     if (existing == null) return null;
     if (existing.role == 'owner' && existing.isActive && await _otherActiveOwners(id) == 0) return 'owner';
+    await _db.into(_db.staffDeletions).insertOnConflictUpdate(
+          StaffDeletionsCompanion.insert(id: id, deletedAt: DateTime.now()),
+        );
     await (_db.delete(_db.staff)..where((row) => row.id.equals(id))).go();
     return null;
   }
