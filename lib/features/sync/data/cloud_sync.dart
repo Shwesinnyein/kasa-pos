@@ -403,8 +403,10 @@ class CloudSync {
           );
     }
     final removedStaff = {for (final row in await _db.select(_db.staffDeletions).get()) row.id};
+    final remoteStaff = <String>{};
     for (final row in await _fetch(base, key, 'staff')) {
       final id = row['id'] as String;
+      remoteStaff.add(id);
       if (removedStaff.contains(id)) continue;
       await _db.into(_db.staff).insertOnConflictUpdate(
             StaffCompanion.insert(
@@ -417,6 +419,12 @@ class CloudSync {
               syncStatus: const Value('synced'),
             ),
           );
+    }
+    final localStaff = await _db.select(_db.staff).get();
+    for (final row in localStaff) {
+      final gone = removedStaff.contains(row.id) || (row.syncStatus == 'synced' && !remoteStaff.contains(row.id));
+      if (!gone) continue;
+      await (_db.delete(_db.staff)..where((item) => item.id.equals(row.id))).go();
     }
     for (final row in await _fetch(base, key, 'categories')) {
       final id = row['id'] as String;
