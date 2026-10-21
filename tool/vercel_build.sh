@@ -6,11 +6,12 @@ ROOT="$(pwd)"
 SDK="${ROOT}/.flutter-sdk"
 
 if [ ! -x "${SDK}/bin/flutter" ]; then
-  mkdir -p "${SDK}"
+  rm -rf "${SDK}"
   curl -fsSL -o /tmp/flutter.tar.xz \
     "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
-  tar -xJf /tmp/flutter.tar.xz -C "${ROOT}"
-  mv "${ROOT}/flutter" "${SDK}"
+  rm -rf /tmp/flutter
+  tar -xJf /tmp/flutter.tar.xz -C /tmp
+  mv /tmp/flutter "${SDK}"
 fi
 
 export PATH="${SDK}/bin:${PATH}"
