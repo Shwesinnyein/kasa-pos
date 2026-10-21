@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../features/auth/data/pin_hasher.dart';
 import 'app_database.dart';
@@ -207,7 +206,10 @@ class DatabaseSeeder {
   }
 
   String _platform() {
-    if (Platform.isAndroid || Platform.isIOS) return 'tablet';
-    return 'desktop';
+    if (kIsWeb) return 'web';
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS => 'tablet',
+      _ => 'desktop',
+    };
   }
 }

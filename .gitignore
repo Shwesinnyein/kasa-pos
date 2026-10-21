@@ -149,6 +149,7 @@ vite.config.ts.timestamp-*
 .turbo
 
 # Flutter
+.flutter-sdk/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
