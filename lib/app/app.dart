@@ -21,6 +21,8 @@ import '../features/stock/presentation/stock_report_screen.dart';
 import '../features/session/session_controller.dart';
 import 'theme.dart';
 
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class KasaApp extends ConsumerWidget {
   const KasaApp({super.key});
 
@@ -29,8 +31,16 @@ class KasaApp extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     final signedOut = session == null;
     final settings = ref.watch(settingsProvider).value ?? AppSettings.fallback;
+    ref.listen(sessionProvider, (previous, next) {
+      if (previous != null && next == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+        });
+      }
+    });
 
     return MaterialApp(
+      navigatorKey: _rootNavigatorKey,
       title: 'Kasa Shop',
       debugShowCheckedModeBanner: false,
       theme: buildKasaTheme(seed: settings.color),
