@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../features/session/session_controller.dart';
-import '../../features/settings/data/settings_local_data_source.dart';
 
 class RegisterBar extends ConsumerWidget implements PreferredSizeWidget {
   const RegisterBar({super.key, this.showGear = false});
@@ -122,12 +121,6 @@ class _Pending extends ConsumerWidget {
   }
 
   Future<void> _sync(BuildContext context, WidgetRef ref) async {
-    final config = await SettingsLocalDataSource(ref.read(databaseProvider)).loadCloud();
-    if (!context.mounted) return;
-    if (!config.ready) {
-      await Navigator.of(context).pushNamed('/cloud');
-      return;
-    }
     if (!online) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('အော့ဖ်လိုင်း။ ပို့ရန် $count ခု')));
       return;

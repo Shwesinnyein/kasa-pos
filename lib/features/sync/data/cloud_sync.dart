@@ -12,9 +12,21 @@ class CloudConfig {
   final String url;
   final String key;
 
-  static const empty = CloudConfig(url: '', key: '');
+  static const builtInUrl = 'https://mmqkaqewcbhzeflefgiq.supabase.co';
+  static const builtInKey = 'sb_publishable_P0NLYwHZ-3l1fCrrJnXq1w_lU1aIU41';
 
-  bool get ready => url.trim().isNotEmpty && key.trim().isNotEmpty;
+  static const empty = CloudConfig(url: builtInUrl, key: builtInKey);
+
+  factory CloudConfig.saved({String? url, String? key}) {
+    final savedUrl = (url ?? '').trim();
+    final savedKey = (key ?? '').trim();
+    return CloudConfig(
+      url: savedUrl.isEmpty ? builtInUrl : savedUrl,
+      key: savedKey.isEmpty ? builtInKey : savedKey,
+    );
+  }
+
+  bool get ready => url.trim().isNotEmpty && key.trim().isNotEmpty && !key.trim().startsWith('sb_secret_');
 }
 
 class CloudSync {
@@ -50,7 +62,7 @@ class CloudSync {
 
   Future<String?> _pushOnce() async {
     final device = await (_db.select(_db.devices)..where((row) => row.id.equals(DatabaseSeeder.deviceId))).getSingleOrNull();
-    final config = CloudConfig(url: device?.supabaseUrl ?? '', key: device?.supabaseKey ?? '');
+    final config = CloudConfig.saved(url: device?.supabaseUrl, key: device?.supabaseKey);
     if (!config.ready) return 'missing';
     final base = _baseUrl(config.url);
     if (base == null) return 'url';

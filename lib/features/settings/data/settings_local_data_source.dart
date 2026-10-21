@@ -77,7 +77,7 @@ class SettingsLocalDataSource {
   Future<CloudConfig> loadCloud() async {
     final device = await (_db.select(_db.devices)..where((row) => row.id.equals(DatabaseSeeder.deviceId))).getSingleOrNull();
     if (device == null) return CloudConfig.empty;
-    return CloudConfig(url: device.supabaseUrl ?? '', key: device.supabaseKey ?? '');
+    return CloudConfig.saved(url: device.supabaseUrl, key: device.supabaseKey);
   }
 
   Future<void> saveCloud(CloudConfig config) async {
