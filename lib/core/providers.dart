@@ -26,6 +26,7 @@ import '../features/account/data/account_local_data_source.dart';
 import '../features/shop/data/shop_local_data_source.dart';
 import '../features/shop/domain/entities/shop_profile.dart';
 import '../features/sync/data/cloud_sync.dart';
+import '../features/sync/data/web_save.dart';
 import '../features/sync/data/sync_local_data_source.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -125,6 +126,7 @@ final pendingCountProvider = FutureProvider<int>((ref) {
 final cloudSyncProvider = Provider<CloudSync>((ref) {
   return CloudSync(
     ref.watch(databaseProvider),
+    hub: webSaveHub,
     onDone: () {
       ref.invalidate(pendingCountProvider);
       ref.invalidate(accountListProvider);

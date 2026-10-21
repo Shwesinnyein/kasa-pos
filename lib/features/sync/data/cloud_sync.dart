@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_seeder.dart';
+import 'web_save.dart';
 
 class CloudConfig {
   const CloudConfig({required this.url, required this.key});
@@ -30,10 +31,11 @@ class CloudConfig {
 }
 
 class CloudSync {
-  CloudSync(this._db, {required this.onDone});
+  CloudSync(this._db, {required this.onDone, this.hub});
 
   final AppDatabase _db;
   final void Function() onDone;
+  final WebSaveHub? hub;
 
   var _again = false;
   Future<String?>? _current;
@@ -68,12 +70,14 @@ class CloudSync {
     if (base == null) return 'url';
     if (config.key.trim().startsWith('sb_secret_')) return 'secret';
 
+    hub?.paused = true;
     try {
-      await _deleteRemovedStaff(base, config.key);
-      await _pull(base, config.key);
-    } on CloudSyncException catch (error) {
-      return error.message;
-    }
+      try {
+        await _deleteRemovedStaff(base, config.key);
+        await _pull(base, config.key);
+      } on CloudSyncException catch (error) {
+        return error.message;
+      }
 
     final shops = await _db.select(_db.shops).get();
     final staff = await _db.select(_db.staff).get();
@@ -370,6 +374,9 @@ class CloudSync {
       DevicesCompanion(lastSyncAt: Value(sentAt)),
     );
     return null;
+    } finally {
+      hub?.paused = false;
+    }
   }
 
   Future<void> _pull(String base, String key) async {

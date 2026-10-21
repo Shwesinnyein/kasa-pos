@@ -5,6 +5,19 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
+QueryExecutor _open(QueryExecutor? executor, QueryInterceptor? interceptor) {
+  final database = executor ??
+      driftDatabase(
+        name: 'kasa',
+        web: DriftWebOptions(
+          sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+          driftWorker: Uri.parse('drift_worker.js'),
+        ),
+      );
+  if (interceptor == null) return database;
+  return database.interceptWith(interceptor);
+}
+
 @DriftDatabase(
   tables: [
     Shops,
@@ -30,17 +43,8 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor])
-      : super(
-          executor ??
-              driftDatabase(
-                name: 'kasa',
-                web: DriftWebOptions(
-                  sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-                  driftWorker: Uri.parse('drift_worker.js'),
-                ),
-              ),
-        );
+  AppDatabase([QueryExecutor? executor, QueryInterceptor? interceptor])
+      : super(_open(executor, interceptor));
 
   @override
   int get schemaVersion => 11;

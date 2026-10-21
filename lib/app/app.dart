@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +22,7 @@ import '../features/sale/presentation/sale_screen.dart';
 import '../features/stock/presentation/stock_list_screen.dart';
 import '../features/stock/presentation/stock_report_screen.dart';
 import '../features/session/session_controller.dart';
+import '../features/sync/data/web_save.dart';
 import 'theme.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -90,6 +92,7 @@ class _LiveSyncState extends ConsumerState<_LiveSync> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) webSaveHub.onWrite = _exchange;
     _timer = Timer.periodic(const Duration(seconds: 5), (_) => _exchange());
   }
 
