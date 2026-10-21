@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../features/session/session_controller.dart';
+import '../../features/settings/data/settings_local_data_source.dart';
 
 class RegisterBar extends ConsumerWidget implements PreferredSizeWidget {
   const RegisterBar({super.key, this.showGear = false});
@@ -41,7 +42,7 @@ class RegisterBar extends ConsumerWidget implements PreferredSizeWidget {
           const SizedBox(width: 12),
           _Status(online: online),
           const SizedBox(width: 12),
-          _Pending(count: pending),
+          _Pending(count: pending, online: online),
           if (showGear) ...[
             const SizedBox(width: 4),
             IconButton(
@@ -101,17 +102,45 @@ class _Status extends StatelessWidget {
   }
 }
 
-class _Pending extends StatelessWidget {
-  const _Pending({required this.count});
+class _Pending extends ConsumerWidget {
+  const _Pending({required this.count, required this.online});
 
   final int count;
+  final bool online;
 
   @override
-  Widget build(BuildContext context) {
-    return Badge(
-      isLabelVisible: count > 0,
-      label: Text('$count'),
-      child: const Icon(Icons.cloud_outlined),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      tooltip: 'ဒေတာချိတ်မည်',
+      onPressed: () => _sync(context, ref),
+      icon: Badge(
+        isLabelVisible: count > 0,
+        label: Text('$count'),
+        child: const Icon(Icons.cloud_outlined),
+      ),
     );
+  }
+
+  Future<void> _sync(BuildContext context, WidgetRef ref) async {
+    final config = await SettingsLocalDataSource(ref.read(databaseProvider)).loadCloud();
+    if (!context.mounted) return;
+    if (!config.ready) {
+      await Navigator.of(context).pushNamed('/cloud');
+      return;
+    }
+    if (!online) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('အော့ဖ်လိုင်း။ ပို့ရန် $count ခု')));
+      return;
+    }
+    final error = await ref.read(cloudSyncProvider).push();
+    if (!context.mounted) return;
+    final message = switch (error) {
+      null => 'ပို့ပြီးပါပြီ။',
+      'missing' => 'လိပ်စာနှင့် key ကို တစ်ကြိမ် ထည့်ပါ။',
+      'secret' => 'publishable key ကို ထည့်ပါ။',
+      'url' => 'လိပ်စာသည် https:// ဖြင့် စရမည်။',
+      _ => error,
+    };
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }

@@ -25,6 +25,7 @@ import '../features/settings/data/settings_local_data_source.dart';
 import '../features/account/data/account_local_data_source.dart';
 import '../features/shop/data/shop_local_data_source.dart';
 import '../features/shop/domain/entities/shop_profile.dart';
+import '../features/sync/data/cloud_sync.dart';
 import '../features/sync/data/sync_local_data_source.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -119,6 +120,10 @@ final profitReportProvider = FutureProvider<ProfitReport>((ref) {
 
 final pendingCountProvider = FutureProvider<int>((ref) {
   return SyncLocalDataSource(ref.watch(databaseProvider)).pendingCount();
+});
+
+final cloudSyncProvider = Provider<CloudSync>((ref) {
+  return CloudSync(ref.watch(databaseProvider), onDone: () => ref.invalidate(pendingCountProvider));
 });
 
 final onlineProvider = StreamProvider<bool>((ref) async* {

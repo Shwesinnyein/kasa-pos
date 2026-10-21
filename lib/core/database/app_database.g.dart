@@ -501,6 +501,28 @@ class $DevicesTable extends Devices with TableInfo<$DevicesTable, Device> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _supabaseUrlMeta = const VerificationMeta(
+    'supabaseUrl',
+  );
+  @override
+  late final GeneratedColumn<String> supabaseUrl = GeneratedColumn<String>(
+    'supabase_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supabaseKeyMeta = const VerificationMeta(
+    'supabaseKey',
+  );
+  @override
+  late final GeneratedColumn<String> supabaseKey = GeneratedColumn<String>(
+    'supabase_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -511,6 +533,8 @@ class $DevicesTable extends Devices with TableInfo<$DevicesTable, Device> {
     themeMode,
     themeColor,
     lastSyncAt,
+    supabaseUrl,
+    supabaseKey,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -580,6 +604,24 @@ class $DevicesTable extends Devices with TableInfo<$DevicesTable, Device> {
         ),
       );
     }
+    if (data.containsKey('supabase_url')) {
+      context.handle(
+        _supabaseUrlMeta,
+        supabaseUrl.isAcceptableOrUnknown(
+          data['supabase_url']!,
+          _supabaseUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supabase_key')) {
+      context.handle(
+        _supabaseKeyMeta,
+        supabaseKey.isAcceptableOrUnknown(
+          data['supabase_key']!,
+          _supabaseKeyMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -621,6 +663,14 @@ class $DevicesTable extends Devices with TableInfo<$DevicesTable, Device> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_sync_at'],
       ),
+      supabaseUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supabase_url'],
+      ),
+      supabaseKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supabase_key'],
+      ),
     );
   }
 
@@ -639,6 +689,8 @@ class Device extends DataClass implements Insertable<Device> {
   final String themeMode;
   final String themeColor;
   final DateTime? lastSyncAt;
+  final String? supabaseUrl;
+  final String? supabaseKey;
   const Device({
     required this.id,
     required this.shopId,
@@ -648,6 +700,8 @@ class Device extends DataClass implements Insertable<Device> {
     required this.themeMode,
     required this.themeColor,
     this.lastSyncAt,
+    this.supabaseUrl,
+    this.supabaseKey,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -661,6 +715,12 @@ class Device extends DataClass implements Insertable<Device> {
     map['theme_color'] = Variable<String>(themeColor);
     if (!nullToAbsent || lastSyncAt != null) {
       map['last_sync_at'] = Variable<DateTime>(lastSyncAt);
+    }
+    if (!nullToAbsent || supabaseUrl != null) {
+      map['supabase_url'] = Variable<String>(supabaseUrl);
+    }
+    if (!nullToAbsent || supabaseKey != null) {
+      map['supabase_key'] = Variable<String>(supabaseKey);
     }
     return map;
   }
@@ -677,6 +737,12 @@ class Device extends DataClass implements Insertable<Device> {
       lastSyncAt: lastSyncAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAt),
+      supabaseUrl: supabaseUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supabaseUrl),
+      supabaseKey: supabaseKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supabaseKey),
     );
   }
 
@@ -694,6 +760,8 @@ class Device extends DataClass implements Insertable<Device> {
       themeMode: serializer.fromJson<String>(json['themeMode']),
       themeColor: serializer.fromJson<String>(json['themeColor']),
       lastSyncAt: serializer.fromJson<DateTime?>(json['lastSyncAt']),
+      supabaseUrl: serializer.fromJson<String?>(json['supabaseUrl']),
+      supabaseKey: serializer.fromJson<String?>(json['supabaseKey']),
     );
   }
   @override
@@ -708,6 +776,8 @@ class Device extends DataClass implements Insertable<Device> {
       'themeMode': serializer.toJson<String>(themeMode),
       'themeColor': serializer.toJson<String>(themeColor),
       'lastSyncAt': serializer.toJson<DateTime?>(lastSyncAt),
+      'supabaseUrl': serializer.toJson<String?>(supabaseUrl),
+      'supabaseKey': serializer.toJson<String?>(supabaseKey),
     };
   }
 
@@ -720,6 +790,8 @@ class Device extends DataClass implements Insertable<Device> {
     String? themeMode,
     String? themeColor,
     Value<DateTime?> lastSyncAt = const Value.absent(),
+    Value<String?> supabaseUrl = const Value.absent(),
+    Value<String?> supabaseKey = const Value.absent(),
   }) => Device(
     id: id ?? this.id,
     shopId: shopId ?? this.shopId,
@@ -729,6 +801,8 @@ class Device extends DataClass implements Insertable<Device> {
     themeMode: themeMode ?? this.themeMode,
     themeColor: themeColor ?? this.themeColor,
     lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
+    supabaseUrl: supabaseUrl.present ? supabaseUrl.value : this.supabaseUrl,
+    supabaseKey: supabaseKey.present ? supabaseKey.value : this.supabaseKey,
   );
   Device copyWithCompanion(DevicesCompanion data) {
     return Device(
@@ -744,6 +818,12 @@ class Device extends DataClass implements Insertable<Device> {
       lastSyncAt: data.lastSyncAt.present
           ? data.lastSyncAt.value
           : this.lastSyncAt,
+      supabaseUrl: data.supabaseUrl.present
+          ? data.supabaseUrl.value
+          : this.supabaseUrl,
+      supabaseKey: data.supabaseKey.present
+          ? data.supabaseKey.value
+          : this.supabaseKey,
     );
   }
 
@@ -757,7 +837,9 @@ class Device extends DataClass implements Insertable<Device> {
           ..write('language: $language, ')
           ..write('themeMode: $themeMode, ')
           ..write('themeColor: $themeColor, ')
-          ..write('lastSyncAt: $lastSyncAt')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('supabaseUrl: $supabaseUrl, ')
+          ..write('supabaseKey: $supabaseKey')
           ..write(')'))
         .toString();
   }
@@ -772,6 +854,8 @@ class Device extends DataClass implements Insertable<Device> {
     themeMode,
     themeColor,
     lastSyncAt,
+    supabaseUrl,
+    supabaseKey,
   );
   @override
   bool operator ==(Object other) =>
@@ -784,7 +868,9 @@ class Device extends DataClass implements Insertable<Device> {
           other.language == this.language &&
           other.themeMode == this.themeMode &&
           other.themeColor == this.themeColor &&
-          other.lastSyncAt == this.lastSyncAt);
+          other.lastSyncAt == this.lastSyncAt &&
+          other.supabaseUrl == this.supabaseUrl &&
+          other.supabaseKey == this.supabaseKey);
 }
 
 class DevicesCompanion extends UpdateCompanion<Device> {
@@ -796,6 +882,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
   final Value<String> themeMode;
   final Value<String> themeColor;
   final Value<DateTime?> lastSyncAt;
+  final Value<String?> supabaseUrl;
+  final Value<String?> supabaseKey;
   final Value<int> rowid;
   const DevicesCompanion({
     this.id = const Value.absent(),
@@ -806,6 +894,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
     this.themeMode = const Value.absent(),
     this.themeColor = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
+    this.supabaseUrl = const Value.absent(),
+    this.supabaseKey = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DevicesCompanion.insert({
@@ -817,6 +907,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
     this.themeMode = const Value.absent(),
     this.themeColor = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
+    this.supabaseUrl = const Value.absent(),
+    this.supabaseKey = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        shopId = Value(shopId),
@@ -831,6 +923,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
     Expression<String>? themeMode,
     Expression<String>? themeColor,
     Expression<DateTime>? lastSyncAt,
+    Expression<String>? supabaseUrl,
+    Expression<String>? supabaseKey,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -842,6 +936,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
       if (themeMode != null) 'theme_mode': themeMode,
       if (themeColor != null) 'theme_color': themeColor,
       if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (supabaseUrl != null) 'supabase_url': supabaseUrl,
+      if (supabaseKey != null) 'supabase_key': supabaseKey,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -855,6 +951,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
     Value<String>? themeMode,
     Value<String>? themeColor,
     Value<DateTime?>? lastSyncAt,
+    Value<String?>? supabaseUrl,
+    Value<String?>? supabaseKey,
     Value<int>? rowid,
   }) {
     return DevicesCompanion(
@@ -866,6 +964,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
       themeMode: themeMode ?? this.themeMode,
       themeColor: themeColor ?? this.themeColor,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      supabaseUrl: supabaseUrl ?? this.supabaseUrl,
+      supabaseKey: supabaseKey ?? this.supabaseKey,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -897,6 +997,12 @@ class DevicesCompanion extends UpdateCompanion<Device> {
     if (lastSyncAt.present) {
       map['last_sync_at'] = Variable<DateTime>(lastSyncAt.value);
     }
+    if (supabaseUrl.present) {
+      map['supabase_url'] = Variable<String>(supabaseUrl.value);
+    }
+    if (supabaseKey.present) {
+      map['supabase_key'] = Variable<String>(supabaseKey.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -914,6 +1020,8 @@ class DevicesCompanion extends UpdateCompanion<Device> {
           ..write('themeMode: $themeMode, ')
           ..write('themeColor: $themeColor, ')
           ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('supabaseUrl: $supabaseUrl, ')
+          ..write('supabaseKey: $supabaseKey, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10797,6 +10905,8 @@ typedef $$DevicesTableCreateCompanionBuilder =
       Value<String> themeMode,
       Value<String> themeColor,
       Value<DateTime?> lastSyncAt,
+      Value<String?> supabaseUrl,
+      Value<String?> supabaseKey,
       Value<int> rowid,
     });
 typedef $$DevicesTableUpdateCompanionBuilder =
@@ -10809,6 +10919,8 @@ typedef $$DevicesTableUpdateCompanionBuilder =
       Value<String> themeMode,
       Value<String> themeColor,
       Value<DateTime?> lastSyncAt,
+      Value<String?> supabaseUrl,
+      Value<String?> supabaseKey,
       Value<int> rowid,
     });
 
@@ -10858,6 +10970,16 @@ class $$DevicesTableFilterComposer
 
   ColumnFilters<DateTime> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supabaseUrl => $composableBuilder(
+    column: $table.supabaseUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supabaseKey => $composableBuilder(
+    column: $table.supabaseKey,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10910,6 +11032,16 @@ class $$DevicesTableOrderingComposer
     column: $table.lastSyncAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get supabaseUrl => $composableBuilder(
+    column: $table.supabaseUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supabaseKey => $composableBuilder(
+    column: $table.supabaseKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DevicesTableAnnotationComposer
@@ -10946,6 +11078,16 @@ class $$DevicesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastSyncAt => $composableBuilder(
     column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supabaseUrl => $composableBuilder(
+    column: $table.supabaseUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supabaseKey => $composableBuilder(
+    column: $table.supabaseKey,
     builder: (column) => column,
   );
 }
@@ -10986,6 +11128,8 @@ class $$DevicesTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<String> themeColor = const Value.absent(),
                 Value<DateTime?> lastSyncAt = const Value.absent(),
+                Value<String?> supabaseUrl = const Value.absent(),
+                Value<String?> supabaseKey = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DevicesCompanion(
                 id: id,
@@ -10996,6 +11140,8 @@ class $$DevicesTableTableManager
                 themeMode: themeMode,
                 themeColor: themeColor,
                 lastSyncAt: lastSyncAt,
+                supabaseUrl: supabaseUrl,
+                supabaseKey: supabaseKey,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11008,6 +11154,8 @@ class $$DevicesTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<String> themeColor = const Value.absent(),
                 Value<DateTime?> lastSyncAt = const Value.absent(),
+                Value<String?> supabaseUrl = const Value.absent(),
+                Value<String?> supabaseKey = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DevicesCompanion.insert(
                 id: id,
@@ -11018,6 +11166,8 @@ class $$DevicesTableTableManager
                 themeMode: themeMode,
                 themeColor: themeColor,
                 lastSyncAt: lastSyncAt,
+                supabaseUrl: supabaseUrl,
+                supabaseKey: supabaseKey,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

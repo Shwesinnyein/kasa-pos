@@ -7,6 +7,7 @@ import '../../../core/providers.dart';
 import '../../../core/widgets/register_bar.dart';
 import '../../session/session_controller.dart';
 import '../../auth/domain/entities/staff_user.dart';
+import '../../sync/data/cloud_sync.dart';
 import '../data/settings_local_data_source.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -69,6 +70,7 @@ class SettingsScreen extends ConsumerWidget {
           _tile(context, copy.report, () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ReportScreen()))),
           _tile(context, copy.profile, () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfileScreen()))),
           _tile(context, copy.shopName, () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ShopNameScreen()))),
+          _tile(context, copy.cloud, () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CloudSyncScreen()))),
         ],
       ),
     );
@@ -311,6 +313,137 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
           TextField(controller: _name, decoration: InputDecoration(labelText: copy.shopName, filled: true, fillColor: Theme.of(context).cardColor)),
           const SizedBox(height: 16),
           Align(alignment: Alignment.centerRight, child: FilledButton(onPressed: _saving ? null : _save, child: Text(copy.save))),
+        ],
+      ),
+    );
+  }
+}
+
+class CloudSyncScreen extends ConsumerStatefulWidget {
+  const CloudSyncScreen({super.key});
+
+  @override
+  ConsumerState<CloudSyncScreen> createState() => _CloudSyncScreenState();
+}
+
+class _CloudSyncScreenState extends ConsumerState<CloudSyncScreen> {
+  late final TextEditingController _url;
+  late final TextEditingController _key;
+  var _busy = false;
+  var _ready = false;
+  var _showSetup = false;
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    _url = TextEditingController();
+    _key = TextEditingController();
+    Future<void>.microtask(_load);
+  }
+
+  Future<void> _load() async {
+    final config = await SettingsLocalDataSource(ref.read(databaseProvider)).loadCloud();
+    if (!mounted) return;
+    _url.text = config.url;
+    _key.text = config.key;
+    setState(() {
+      _ready = config.ready;
+      _showSetup = !config.ready;
+    });
+  }
+
+  @override
+  void dispose() {
+    _url.dispose();
+    _key.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sync() async {
+    final copy = AppCopy(english: ref.read(settingsProvider).value?.english ?? false);
+    final online = ref.read(onlineProvider).value == true;
+    if (_showSetup || !_ready) {
+      final config = CloudConfig(url: _url.text, key: _key.text);
+      if (!config.ready) {
+        setState(() => _message = copy.cloudMissing);
+        return;
+      }
+      if (!config.url.trim().startsWith('https://')) {
+        setState(() => _message = copy.cloudBadUrl);
+        return;
+      }
+      if (config.key.trim().startsWith('sb_secret_')) {
+        setState(() => _message = copy.cloudSecret);
+        return;
+      }
+      await SettingsLocalDataSource(ref.read(databaseProvider)).saveCloud(config);
+      if (!mounted) return;
+      setState(() => _ready = true);
+    }
+    if (!online) {
+      setState(() => _message = copy.cloudOffline);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _message = null;
+    });
+    final error = await ref.read(cloudSyncProvider).push();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _showSetup = false;
+      _message = switch (error) {
+        null => copy.cloudSent,
+        'missing' => copy.cloudMissing,
+        'url' => copy.cloudBadUrl,
+        'secret' => copy.cloudSecret,
+        _ => error,
+      };
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = AppCopy(english: ref.watch(settingsProvider).value?.english ?? false);
+    final pending = ref.watch(pendingCountProvider).value ?? 0;
+    final online = ref.watch(onlineProvider).value ?? false;
+    final fill = Theme.of(context).cardColor;
+    return Scaffold(
+      appBar: const RegisterBar(showGear: true),
+      body: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          Text(copy.cloud, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Text(copy.cloudHint, style: const TextStyle(color: KasaColors.muted)),
+          const SizedBox(height: 20),
+          Text(pending == 0 ? copy.cloudNone : '${copy.cloudWaiting} $pending', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Text(online ? 'အွန်လိုင်း' : copy.cloudOffline, style: TextStyle(color: online ? KasaColors.online : KasaColors.danger)),
+          if (_showSetup) ...[
+            const SizedBox(height: 20),
+            Text(copy.cloudOnce, style: const TextStyle(color: KasaColors.muted)),
+            const SizedBox(height: 12),
+            TextField(controller: _url, decoration: InputDecoration(labelText: copy.cloudUrl, filled: true, fillColor: fill)),
+            const SizedBox(height: 12),
+            TextField(controller: _key, obscureText: true, decoration: InputDecoration(labelText: copy.cloudKey, filled: true, fillColor: fill)),
+          ],
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton(onPressed: _busy ? null : _sync, child: Text(copy.cloudSend)),
+          ),
+          if (_ready && !_showSetup)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(onPressed: () => setState(() => _showSetup = true), child: Text(copy.cloudChange)),
+            ),
+          if (_message != null) ...[
+            const SizedBox(height: 12),
+            Text(_message!),
+          ],
         ],
       ),
     );

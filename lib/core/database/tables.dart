@@ -21,6 +21,8 @@ class Devices extends Table {
   TextColumn get themeMode => text().withDefault(const Constant('system'))();
   TextColumn get themeColor => text().withDefault(const Constant('brown'))();
   DateTimeColumn get lastSyncAt => dateTime().nullable()();
+  TextColumn get supabaseUrl => text().nullable()();
+  TextColumn get supabaseKey => text().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

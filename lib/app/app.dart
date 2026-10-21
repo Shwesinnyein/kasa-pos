@@ -55,6 +55,7 @@ class KasaApp extends ConsumerWidget {
         '/profit': (_) => const ProfitScreen(),
         '/accounts': (_) => const AccountListScreen(),
         '/settings': (_) => const SettingsScreen(),
+        '/cloud': (_) => const CloudSyncScreen(),
       },
     );
   }

@@ -32,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'kasa'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -74,6 +74,10 @@ class AppDatabase extends _$AppDatabase {
             await migrator.addColumn(devices, devices.themeMode);
             await migrator.addColumn(devices, devices.themeColor);
             await migrator.createTable(developerReports);
+          }
+          if (from < 10) {
+            await migrator.addColumn(devices, devices.supabaseUrl);
+            await migrator.addColumn(devices, devices.supabaseKey);
           }
         },
       );

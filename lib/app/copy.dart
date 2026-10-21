@@ -59,4 +59,22 @@ class AppCopy {
   String get reportSaved => english ? 'Saved on this register.' : 'ဒီစက်မှာ သိမ်းပြီးပါပြီ။';
   String get noReports => english ? 'No reports yet.' : 'တင်ပြချက်မရှိသေးပါ။';
   String get shopHint => english ? 'This name shows on the register.' : 'ဒီအမည်ကို မှတ်ပုံတင်ဘားမှာ ပြသည်။';
+  String get cloud => english ? 'Data sync' : 'ဒေတာချိတ်မည်';
+  String get cloudWaiting => english ? 'Waiting to send' : 'ပို့ရန်';
+  String get cloudNone => english ? 'Nothing waiting.' : 'ပို့ရန်မရှိပါ။';
+  String get cloudHint => english
+      ? 'The number is how many rows are waiting. When this Mac is online, click Data sync.'
+      : 'ဂဏန်းသည် ပို့ရန်ကျန်သည့် အရေအတွက်ဖြစ်သည်။ အွန်လိုင်းဖြစ်မှ ဒေတာချိတ်မည် ကို နှိပ်ပါ။';
+  String get cloudOnce => english
+      ? 'Enter these once. After that, only click Data sync.'
+      : 'ဒီနှစ်ခုကို တစ်ကြိမ်သာ ထည့်ပါ။ နောက်ပိုင်း ဒေတာချိတ်မည် ကို နှိပ်ရုံပါ။';
+  String get cloudUrl => english ? 'Project URL' : 'ပရောဂျက်လိပ်စာ';
+  String get cloudKey => 'Publishable key';
+  String get cloudSend => english ? 'Data sync' : 'ဒေတာချိတ်မည်';
+  String get cloudSent => english ? 'Sent.' : 'ပို့ပြီးပါပြီ။';
+  String get cloudMissing => english ? 'Enter the URL and the publishable key once.' : 'လိပ်စာနှင့် key ကို တစ်ကြိမ် ထည့်ပါ။';
+  String get cloudBadUrl => english ? 'The URL must start with https://' : 'လိပ်စာသည် https:// ဖြင့် စရမည်။';
+  String get cloudSecret => english ? 'Paste the publishable key. Leave the secret key in Supabase.' : 'publishable key ကို ထည့်ပါ။ secret key ကို Supabase မှာပဲ ထားပါ။';
+  String get cloudOffline => english ? 'Offline. The waiting number stays until you are online.' : 'အော့ဖ်လိုင်းဖြစ်နေသည်။ အွန်လိုင်းဖြစ်မှ ပို့နိုင်သည်။';
+  String get cloudChange => english ? 'Change connection' : 'ချိတ်ဆက်မှု ပြင်မည်';
 }

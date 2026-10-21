@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_seeder.dart';
+import '../../sync/data/cloud_sync.dart';
 
 class AppSettings {
   const AppSettings({required this.language, required this.themeMode, required this.themeColor});
@@ -71,6 +72,18 @@ class SettingsLocalDataSource {
   Future<List<DeveloperNote>> reports() async {
     final rows = await (_db.select(_db.developerReports)..orderBy([(row) => OrderingTerm.desc(row.createdAt)])).get();
     return [for (final row in rows) DeveloperNote(message: row.message, createdAt: row.createdAt)];
+  }
+
+  Future<CloudConfig> loadCloud() async {
+    final device = await (_db.select(_db.devices)..where((row) => row.id.equals(DatabaseSeeder.deviceId))).getSingleOrNull();
+    if (device == null) return CloudConfig.empty;
+    return CloudConfig(url: device.supabaseUrl ?? '', key: device.supabaseKey ?? '');
+  }
+
+  Future<void> saveCloud(CloudConfig config) async {
+    await (_db.update(_db.devices)..where((row) => row.id.equals(DatabaseSeeder.deviceId))).write(
+      DevicesCompanion(supabaseUrl: Value(config.url.trim()), supabaseKey: Value(config.key.trim())),
+    );
   }
 
   Future<void> addReport(String message) async {
